@@ -1,0 +1,32 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "log:default",
+    "core:default",
+    "dialog:default",
+    "opener:default",
+    "process:default",
+    "notification:default",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://partner.steam-api.com"
+        }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        {
+          "path": "$APPDATA/com.fatfishlab.steamboard"
+        }
+      ]
+    }
+  ]
+}

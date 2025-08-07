@@ -1,0 +1,46 @@
+{
+    "tasks": {
+        "dev": "tauri dev",
+        "ui": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "tauri": "tauri",
+        "bump": "cargo bump $BUMP --manifest-path=src-tauri/Cargo.toml && cargo generate-lockfile --locked --quiet && export STEAMBOARD_VERSION=$(cargo metadata --format-version=1 --no-deps | jq -r '.packages[0].version') && git add Cargo.toml Cargo.lock && git commit -m \"Bump to v$STEAMBOARD_VERSION\" && git tag -a $STEAMBOARD_VERSION -m $STEAMBOARD_VERSION && git push --follow-tags",
+        "bump:patch": "BUMP=patch deno task bump",
+        "bump:minor": "BUMP=minor deno task bump",
+        "bump:major": "BUMP=major deno task bump",
+        "icon": "deno task tauri icon icon.png"
+    },
+    "imports": {
+        "@picocss/pico": "npm:@picocss/pico@^2.1.1",
+        "@tauri-apps/api": "npm:@tauri-apps/api@^2.6.0",
+        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2.6.2",
+        "@tauri-apps/plugin-dialog": "npm:@tauri-apps/plugin-dialog@^2.3.0",
+        "@tauri-apps/plugin-fs": "npm:@tauri-apps/plugin-fs@^2.4.1",
+        "@tauri-apps/plugin-opener": "npm:@tauri-apps/plugin-opener@^2.4.0",
+        "@tauri-apps/plugin-os": "npm:@tauri-apps/plugin-os@^2.3.0",
+        "@tauri-apps/plugin-process": "npm:@tauri-apps/plugin-process@^2.3.0",
+        "@tauri-apps/plugin-sql": "npm:@tauri-apps/plugin-sql@^2.3.0",
+        "@tauri-apps/plugin-updater": "npm:@tauri-apps/plugin-updater@^2.9.0",
+        "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^6.0.0",
+        "luxon": "npm:luxon@^3.7.1",
+        "pinia": "npm:pinia@^3.0.3",
+        "sass": "npm:sass@^1.89.2",
+        "three": "npm:three@^0.178.0",
+        "vite": "npm:vite@^7.0.4",
+        "vue": "npm:vue@^3.5.17",
+        "vue-router": "npm:vue-router@^4.5.1"
+    },
+    "nodeModulesDir": "auto",
+    "compilerOptions": {
+        "lib": [
+            "ES2020",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true
+    }
+}

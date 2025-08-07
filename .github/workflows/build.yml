@@ -1,0 +1,231 @@
+name: Build & publish on Github
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  tauri-build-release:
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            name: 'macOS Universal'
+            environment: build
+            args: '--target universal-apple-darwin'
+            binName: 'Steamboard.app'
+            artifactName: 'Steamboard.app'
+            binPath: 'src-tauri/target/universal-apple-darwin/release/bundle/macos'
+          - platform: 'ubuntu-22.04'
+            name: 'Linux x64'
+            args: ''
+            binName: 'Steamboard'
+            artifactName: 'Steamboard'
+            binPath: 'src-tauri/target/release'
+          - platform: 'windows-latest'
+            name: 'Windows x64'
+            binName: 'Steamboard.exe'
+            artifactName: 'Steamboard.exe'
+            binPath: 'src-tauri/target/release'
+            args: ''
+          - platform: 'macos-latest'
+            name: 'Apple app store'
+            environment: build
+            appstore: true
+            args: '--bundles app --target universal-apple-darwin --config ./src-tauri/tauri.appstore.conf.json'
+            binName: 'Steamboard.app'
+            artifactName: 'Steamboard_for_appstore.app'
+            binPath: 'src-tauri/target/universal-apple-darwin/release/bundle/macos'
+
+    name: ${{ matrix.name }}
+    environment: ${{ matrix.environment }}
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: "2.3.6"
+
+      # - name: Import Tauri updater private key
+      #   env:
+      #     TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      #     RUNNER_TEMP: ${{ runner.temp }}
+      #   run: |
+      #     mkdir -p $RUNNER_TEMP/private_keys
+      #     echo $TAURI_SIGNING_PRIVATE_KEY > ${RUNNER_TEMP}/private_keys/tauri_signing_private_key
+      #     echo $TAURI_SIGNING_PRIVATE_KEY | base64 --decode > ${RUNNER_TEMP}/private_keys/tauri_signing_private_key_decoded
+      #     ls -l ${RUNNER_TEMP}/private_keys
+      #     echo "TAURI_SIGNING_PRIVATE_KEY=${RUNNER_TEMP}/private_keys/tauri_signing_private_key" >> $GITHUB_ENV
+
+      - name: Import Apple Developer Certificates
+        if: matrix.platform == 'macos-latest'
+        env:
+          APPLE_CERT_DEV_ID_BASE64: ${{ secrets.APPLE_CERT_DEV_ID_BASE64 }}
+          APPLE_CERT_3RDPARTY_DEV_APP_BASE64: ${{ secrets.APPLE_CERT_3RDPARTY_DEV_APP_BASE64 }}
+          APPLE_CERT_3RDPARTY_DEV_INSTALL_BASE64: ${{ secrets.APPLE_CERT_3RDPARTY_DEV_INSTALL_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          echo $APPLE_CERT_DEV_ID_BASE64 | base64 --decode > dev-id-certificate.p12
+          echo $APPLE_CERT_3RDPARTY_DEV_APP_BASE64 | base64 --decode > dev-app-certificate.p12
+          echo $APPLE_CERT_3RDPARTY_DEV_INSTALL_BASE64 | base64 --decode > dev-install-certificate.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          security import dev-id-certificate.p12 -k build.keychain -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security import dev-app-certificate.p12 -k build.keychain -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security import dev-install-certificate.p12 -k build.keychain -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          security find-identity -v build.keychain
+
+      - name: Verify Apple Certificates
+        if: matrix.platform == 'macos-latest'
+        env:
+          APPLE_CERT_DEV_ID_TYPE: ${{ vars.APPLE_CERT_DEV_ID_TYPE }}
+          APPLE_CERT_3RDPARTY_DEV_APP_TYPE: ${{ vars.APPLE_CERT_3RDPARTY_DEV_APP_TYPE }}
+          APPLE_CERT_3RDPARTY_DEV_INSTALL_TYPE: ${{ vars.APPLE_CERT_3RDPARTY_DEV_INSTALL_TYPE }}
+        run: |
+          CERT_INFO_DEV_ID=$(security find-identity -v -p codesigning build.keychain | grep "$APPLE_CERT_DEV_ID_TYPE")
+          CERT_DEV_ID_ID=$(echo "$CERT_INFO_DEV_ID" | awk -F'"' '{print $2}')
+          echo "CERT_DEV_ID_ID=$CERT_DEV_ID_ID" >> $GITHUB_ENV
+          CERT_DEV_APP_INFO=$(security find-identity -v | grep "$APPLE_CERT_3RDPARTY_DEV_APP_TYPE")
+          CERT_DEV_APP_ID=$(echo "$CERT_DEV_APP_INFO" | awk -F'"' '{print $2}')
+          echo "CERT_DEV_APP_ID=$CERT_DEV_APP_ID" >> $GITHUB_ENV
+          CERT_DEV_INSTALL_INFO=$(security find-identity -v | grep "$APPLE_CERT_3RDPARTY_DEV_INSTALL_TYPE")
+          CERT_DEV_INSTALL_ID=$(echo "$CERT_DEV_INSTALL_INFO" | awk -F'"' '{print $2}')
+          echo "CERT_DEV_INSTALL_ID=$CERT_DEV_INSTALL_ID" >> $GITHUB_ENV
+          echo "Certificates imported."
+
+      - name: Add Apple API Key for notarization (macos & non app store)
+        if: matrix.platform == 'macos-latest' && matrix.appstore == false
+        env:
+            APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+            APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
+        run: |
+            mkdir -p /Users/runner/private_keys
+            echo $APPLE_API_KEY_P8_BASE64 | base64 --decode > "/Users/runner/private_keys/AuthKey_${{ env.APPLE_API_KEY_ID }}.p8"
+            echo "APPLE_API_KEY_PATH=/Users/runner/private_keys/AuthKey_${{ env.APPLE_API_KEY_ID }}.p8" >> $GITHUB_ENV
+            ls -l /Users/runner/private_keys
+
+      - name: Create Provisioning Profile (app store)
+        if: matrix.platform == 'macos-latest' && matrix.appstore
+        run: |
+          echo "${{ secrets.PROVISION_PROFILE_BASE64 }}" | base64 --decode > ./src-tauri/build/macos/steamboard.provisionprofile
+
+      - name: Install Tauri target x86_64-apple-darwin (macOS only)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          rustup target add x86_64-apple-darwin
+
+      - name: Install dependencies (ubuntu)
+        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf tree
+
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ./src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build Tauri app (non app store)
+        if: matrix.appstore == false
+        id: tauri_build
+        uses: tauri-apps/tauri-action@564aea5a8075c7a54c167bb0cf5b3255314a7f9d
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_SIGNING_IDENTITY: ${{ env.CERT_DEV_ID_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH }}
+        with:
+          tagName: __VERSION__
+          releaseName: '__VERSION__'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: false
+          updaterJsonKeepUniversal: true
+          updaterJsonPreferNsis: true
+          assetNamePattern: "[name]_[platform]_[arch][ext]"
+          args: ${{ matrix.args }}
+
+      - name: Build Tauri app (app store)
+        if: matrix.appstore
+        uses: tauri-apps/tauri-action@564aea5a8075c7a54c167bb0cf5b3255314a7f9d
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERT_3RDPARTY_DEV_APP_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ env.CERT_DEV_APP_ID }}
+        with:
+          args: ${{ matrix.args }}
+
+    #   - name: Attest
+    #     uses: actions/attest-build-provenance@v2
+    #     with:
+    #       subject-path: 'src-tauri/target/aarch64-apple-darwin/release/bundle/macos/Steamboard.app'
+
+      - name: Set Apple Store private keys (app store)
+        if: matrix.platform == 'macos-latest' && matrix.appstore
+        env:
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_KEY: ${{ env.APPLE_API_KEY }}
+        run: |
+          mkdir -p ./private_keys
+          echo ${{ env.APPLE_API_KEY }} > ./private_keys/AuthKey_${{ env.APPLE_API_KEY_ID }}.p8
+
+      # - name: Create Apple Store package (app store)
+      #   if: matrix.platform == 'macos-latest' && matrix.appstore
+      #   env:
+      #     APPLE_SIGNING_IDENTITY: ${{ vars.APPLE_CERT_3RDPARTY_DEV_INSTALL_TYPE }}
+      #     APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+      #     APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+      #   run: |
+      #     echo $APPLE_SIGNING_IDENTITY
+      #     security find-identity -v build.keychain
+      #     ls -l "src-tauri/target/universal-apple-darwin/release/bundle/macos"
+      #     xcrun productbuild --sign "${{ env.APPLE_SIGNING_IDENTITY }}" --component "src-tauri/target/universal-apple-darwin/release/bundle/macos/Steamboard.app" /Applications steamboard.pkg
+
+      # - name: Upload Apple Store package (app store)
+      #   if: matrix.platform == 'macos-latest' && matrix.appstore
+      #   env:
+      #     APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+      #     APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+      #   run: |
+      #     xcrun altool --upload-app --type macos --file "steamboard.pkg" --apiKey $APPLE_API_KEY_ID --apiIssuer $APPLE_API_ISSUER
+
+      - name: Copy SQL file nearby binary
+        run: |
+          cp src-tauri/steamboard.sql ${{ matrix.binPath }}/.
+
+      - name: Upload binary for Steam (non macOS)
+        uses: actions/upload-artifact@v4.3.2
+        if: matrix.platform != 'macos-latest'
+        with:
+          name: ${{ matrix.artifactName }}
+          path: |
+            ${{ matrix.binPath }}/${{ matrix.binName }}
+            ${{ matrix.binPath }}/steamboard.sql
+
+      - name: Upload binary for Steam (macOS)
+        uses: actions/upload-artifact@v4.3.2
+        if: matrix.platform == 'macos-latest'
+        with:
+          name: ${{ matrix.artifactName }}
+          path: ${{ matrix.binPath }}/${{ matrix.binName }}

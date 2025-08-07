@@ -1,0 +1,14 @@
+{
+  "bundle": {
+    "macOS": {
+      "entitlements": "./build/macos/Entitlements.plist",
+      "files": {
+        "embedded.provisionprofile": "./build/macos/Steamboard.provisionprofile"
+      }
+    },
+    "resources": {
+      "./steamboard.sql": "steamboard.sql",
+      "./build/macos/PrivacyInfo.xcprivacy": "PrivacyInfo.xcprivacy"
+    }
+  }
+}

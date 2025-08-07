@@ -1,0 +1,34 @@
+{
+  // See https://code.visualstudio.com/docs/editor/tasks for more information
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Deno Tauri Dev",
+      "type": "shell",
+      "command": "deno",
+      "args": [
+        "task",
+        "tauri",
+        "dev"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ui:dev",
+      "type": "shell",
+      "isBackground": true,
+      "command": "deno",
+      "args": ["run", "ui"]
+    },
+    {
+      "label": "ui:build",
+      "type": "shell",
+      "command": "deno",
+      "args": ["run", "build"]
+    }
+  ]
+}
