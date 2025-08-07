@@ -1,5 +1,7 @@
-# Security Policy
+
+# Steamboard security policy
 We take security vulnerabilities seriously.
+
 We appreciate your help in responsibly disclosing your findings, and we'll make every effort to acknowledge your contributions.
 
 # Supported Versions
