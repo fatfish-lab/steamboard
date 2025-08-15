@@ -8,7 +8,5 @@
 	<string>UGAHWB6FSW.com.fatfishlab.steamboard</string>
   <key>com.apple.security.network.client</key>
   <true/>
-  <key>com.apple.security.network.server</key>
-  <true/>
 </dict>
 </plist>
