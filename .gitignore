@@ -28,4 +28,3 @@ dist-ssr
 steamboard.db
 steamboard.pkg
 *.provisionprofile
-src-tauri/src/main.rs
