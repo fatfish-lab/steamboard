@@ -4,5 +4,7 @@
 <dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<true/>
+  <key>ITSEncryptionExportComplianceCode</key>
+  <string>47998057-c1b2-4170-a38d-ab23496fd157</string>
 </dict>
 </plist>
