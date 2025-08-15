@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Ask a question on our Discord
-    url: https://discord.gg/CatQEFsKs
+    url: https://discord.gg/nTsbd6fSQf
     about: Please ask and answer questions here.
   - name: Security report
     url: https://github.com/fatfish-lab/steamboard/security/advisories/new
