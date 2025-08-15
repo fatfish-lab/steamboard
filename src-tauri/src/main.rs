@@ -112,7 +112,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                     "support" => {
-                        let _ = app.opener().open_path("https://discord.gg/CatQEFsK", None::<&str>);
+                        let _ = app.opener().open_path("https://steamboard.app/#support", None::<&str>);
                     }
                     "website" => {
                         let _ = app.opener().open_path("https://steamboard.app/", None::<&str>);
