@@ -230,7 +230,7 @@ pub async fn insert_sale_detail(connection: &Connection, detailed_sales: Detaile
         for app_info in detail.app_info.iter().flatten() {
             conn.execute(
                 "
-                    INSERT INTO steam_steam_app_info (
+                    INSERT INTO steam_app_info (
                         appid,
                         app_name
                     )
@@ -581,7 +581,7 @@ pub async fn get_sale_details_by_date(connection: &Connection, from_date: Option
                     LEFT JOIN steam_partner_info partner on result.partnerid = partner.partnerid
                     LEFT JOIN steam_package_info package on result.packageid = package.packageid
                     LEFT JOIN steam_bundle_info bundle on result.bundleid = bundle.bundleid
-                    LEFT JOIN steam_app_info app on result.appid = app.appid
+                    LEFT JOIN steam_app_info app on result.appid = app.appid OR result.primary_appid = app.appid
                     LEFT JOIN steam_game_item_info game_item on result.game_item_id = game_item.game_item_id
                     LEFT JOIN steam_key_request_info key_request on result.key_request_id = key_request.key_request_id
                     LEFT JOIN steam_country_info country on result.country_code = country.country_code
