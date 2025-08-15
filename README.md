@@ -11,7 +11,7 @@ Check out the [website](https://steamboard.app) for more information.
 
 ## Download & install
 
-Steamboard is available for Windows, macOS and Linux. For easier installation, you can find this software on [Steam](https://store.steampowered.com/app/3902810/Steamboard/) or the [App Store]()
+Steamboard is available for Windows, macOS and Linux. For easier installation, you can find this software on [Steam](https://store.steampowered.com/app/3902810/Steamboard/) or the [App Store](https://apps.apple.com/us/app/steamboard/id6749637747).
 
 Source code is available on [GitHub](https://github.com/fatfish-lab/steamboard), binaries are available on [GitHub Releases](https://github.com/fatfish-lab/steamboard/releases).
 
