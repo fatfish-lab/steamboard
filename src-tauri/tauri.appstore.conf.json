@@ -10,5 +10,11 @@
       "./steamboard.sql": "steamboard.sql",
       "./build/macos/PrivacyInfo.xcprivacy": "PrivacyInfo.xcprivacy"
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "",
+      "endpoints": []
+    }
   }
 }

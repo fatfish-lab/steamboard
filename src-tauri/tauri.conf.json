@@ -38,7 +38,7 @@
   },
   "bundle": {
     "active": true,
-    "publisher": "Fatfish Lab & Bubblebird Studio",
+    "publisher": "Fatfish Lab - Bubblebird Studio",
     "targets": "all",
     "longDescription": "Keep your financial data local, private and automatically up to date.\nExport them into multiple formats and get prettier dashboards.",
     "homepage": "https://steamboard.app",
