@@ -57,7 +57,7 @@
     ]
   },
   "plugins": {
-    "updated": {
+    "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE0QUE5M0YxREY5NkYzN0IKUldSNzg1YmY4Wk9xcEN2YnA0M09hYW1HeTNjZDV5ZnJIZDlwcUVVRG4xZFluTnBWVVRDY3h0VUMK",
       "endpoints": [
           "https://github.com/fatfish-lab/steamboard/releases/latest/download/latest.json"
