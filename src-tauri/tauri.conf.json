@@ -38,6 +38,7 @@
   },
   "bundle": {
     "active": true,
+    "publisher": "Fatfish Lab & Bubblebird Studio",
     "targets": "all",
     "longDescription": "Keep your financial data local, private and automatically up to date.\nExport them into multiple formats and get prettier dashboards.",
     "homepage": "https://steamboard.app",
@@ -45,7 +46,7 @@
       "./steamboard.sql": "steamboard.sql"
     },
     "category": "Utility",
-    "createUpdaterArtifacts": false,
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/logo.png",
       "icons/32x32.png",
@@ -54,5 +55,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updated": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE0QUE5M0YxREY5NkYzN0IKUldSNzg1YmY4Wk9xcEN2YnA0M09hYW1HeTNjZDV5ZnJIZDlwcUVVRG4xZFluTnBWVVRDY3h0VUMK",
+      "endpoints": [
+          "https://github.com/fatfish-lab/steamboard/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
