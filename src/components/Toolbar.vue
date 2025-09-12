@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { capitalize } from '../utils.js';
-import { useOptionsStore } from '../stores/options.ts';
+import { useOptionsStore } from '../stores/useOptions.js';
 const props = defineProps({
 
 })

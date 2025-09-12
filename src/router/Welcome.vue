@@ -32,6 +32,9 @@
           :disabled="loading || !settings.steam_api_key" />
         <sb-hint class="clickable" @click="openHelp">Learn how to get your Steam Financial API key</sb-hint>
       </form>
+      <small>Add your public address IP in Steam whitelisted IPs:</small>
+      <code v-if="publicIp" class="public-ip" @click="copyPublicIp">{{ publicIp || 'Loading your public IP...' }}</code>
+      <code v-else class="public-ip" @click="setPublicIp">Click to reveal</code>
       <!-- <div class="security-notice container">
                 <sb-icon icon="security" color="green-50" />
                 <h5 class="title">Your data is safe</h5>
@@ -51,120 +54,144 @@
 </template>
 
 <script setup>
-import { ref, inject } from 'vue'
-import { useRouter } from 'vue-router'
-import { useSettingsStore } from '@/stores/settings.ts'
-import { invoke } from "@tauri-apps/api/core";
-import { openUrl } from '@tauri-apps/plugin-opener';
+  import { ref, inject, onMounted } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { useSettingsStore } from '@/stores/useSettings'
+  import { invoke } from "@tauri-apps/api/core";
+  import { openUrl } from '@tauri-apps/plugin-opener';
+  import { getPublicIp } from '@/utils.js';
+  import { iAlert } from '@/injectionKeys';
 
-const alert = inject('alert')
-const settings = useSettingsStore()
-const router = useRouter()
-const loading = ref(false)
-const connectError = ref("")
-const showHelp = ref(false)
+  const alert = inject(iAlert)
+  const settings = useSettingsStore()
+  const router = useRouter()
+  const loading = ref(false)
+  const connectError = ref("")
+  const publicIp = ref("")
 
-async function connect() {
-  loading.value = true
-
-  try {
-    await invoke("check_api_key_command", { "steam": settings.steam_api_key })
-  } catch (error) {
-    console.log("ERROR", error)
-    connectError.value = "Invalid API key. Please check your key and try again"
-    loading.value = false
-    return
+  async function setPublicIp() {
+    publicIp.value = await getPublicIp();
   }
 
-  // TODO: Add catch(message_toaster) to handle errors
-  await settings.save().catch(alert)
+  async function connect() {
+    loading.value = true
 
-  invoke("sync_command")
+    try {
+      await invoke("check_api_key_command", { "steam": settings.steam_api_key })
+    } catch (error) {
+      console.log("ERROR", error)
+      connectError.value = "Invalid API key. Please check your key and try again"
+      loading.value = false
+      return
+    }
 
-  router.push({ name: 'overview' })
-}
+    // TODO: Add catch(message_toaster) to handle errors
+    await settings.save().catch(alert)
 
-function openPrivacyStatement() {
-  openUrl("https://steamboard.app/#privacy")
-}
+    invoke("sync_command")
 
-function openHelp() {
-  openUrl("https://github.com/fatfish-lab/steamboard/wiki/")
-}
+    router.push({ name: 'overview' })
+  }
+
+  function openPrivacyStatement() {
+    openUrl("https://steamboard.app/#privacy")
+  }
+
+  function openHelp() {
+    openUrl("https://github.com/fatfish-lab/steamboard/wiki/")
+  }
+
+  async function copyPublicIp() {
+    const ip = publicIp.value
+    if (ip === 'Copied !') return
+    await navigator.clipboard.writeText(ip)
+    publicIp.value = "Copied !"
+    setTimeout(() => {
+      publicIp.value = ip
+    }, 2000)
+  }
 
 </script>
 
 <style lang="scss" scoped>
-.welcome-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-  gap: 24px;
-  align-content: center;
-  justify-items: center;
-  text-align: center;
+  .welcome-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    gap: 24px;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
 
-  &.loading {
-    grid-template-rows: min-content max-content;
+    &.loading {
+      grid-template-rows: min-content max-content;
 
-    .loading-icon {
-      width: 63px; // Adjust width to avoid rotational wiggle.
-    }
-  }
-
-  .welcome-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-
-    hgroup {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      text-align: center;
-
-      h1 {
-        color: var(--pico-color-zinc-450);
+      .loading-icon {
+        width: 63px; // Adjust width to avoid rotational wiggle.
       }
     }
 
-    .error-message {
-      display: inline-flex;
+    .welcome-form {
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 4px;
-      color: var(--pico-color-red-400);
-    }
+      justify-content: center;
+      gap: 16px;
 
-    .security-notice {
-      display: grid;
-      grid-template-columns: min-content 1fr;
-      grid-template-rows: min-content;
-      padding: 16px;
-      border: 1px solid var(--pico-color-green-200);
-      border-radius: 8px;
-      background-color: color-mix(in oklab, var(--pico-color-green-500), transparent 90%);
-      font-size: 0.9em;
-      max-width: 800px;
-      gap: 8px;
-      align-items: center;
-      margin-top: 64px;
+      hgroup {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        text-align: center;
 
-
-      .title {
-        color: var(--pico-color-green-50);
-                margin: 0;
-            }
-
-            >a,
-            >p {
-                grid-column: 1 / -1;
-                color: var(--pico-color-green-50);
-                text-decoration-color: var(--pico-color-green-200);
-            }
+        h1 {
+          color: var(--pico-color-zinc-450);
         }
+      }
+
+      .error-message {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--pico-color-red-400);
+      }
+
+      .security-notice {
+        display: grid;
+        grid-template-columns: min-content 1fr;
+        grid-template-rows: min-content;
+        padding: 16px;
+        border: 1px solid var(--pico-color-green-200);
+        border-radius: 8px;
+        background-color: color-mix(in oklab, var(--pico-color-green-500), transparent 90%);
+        font-size: 0.9em;
+        max-width: 800px;
+        gap: 8px;
+        align-items: center;
+        margin-top: 64px;
+
+
+        .title {
+          color: var(--pico-color-green-50);
+          margin: 0;
+        }
+
+        >a,
+        >p {
+          grid-column: 1 / -1;
+          color: var(--pico-color-green-50);
+          text-decoration-color: var(--pico-color-green-200);
+        }
+      }
+
+      code.public-ip {
+        cursor: pointer;
+
+        &:hover {
+          color: var(--pico-primary);
+        }
+      }
     }
-}
+  }
 </style>

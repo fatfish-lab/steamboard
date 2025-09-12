@@ -27,7 +27,7 @@
 import { ref } from 'vue'
 import { invoke } from '@tauri-apps/api/core';
 import { dirname } from '@tauri-apps/api/path';
-import { useOptionsStore } from '../stores/options';
+import { useOptionsStore } from '../stores/useOptions';
 import { save } from '@tauri-apps/plugin-dialog';
 import { DateTime } from 'luxon';
 

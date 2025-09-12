@@ -36,3 +36,11 @@ export function flagFromCountryCode(countryCode) {
         .map(char => 127397 + char.charCodeAt());
     return String.fromCodePoint(...codePoints);
 }
+
+export function getPublicIp() {
+  return fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      return data.ip
+    });
+}

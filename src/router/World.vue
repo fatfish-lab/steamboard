@@ -44,7 +44,7 @@ import { ref, computed, onMounted, onBeforeUnmount, reactive, useTemplateRef, wa
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from '@tauri-apps/api/event';
 
-import { useOptionsStore } from '@/stores/options.ts';
+import { useOptionsStore } from '@/stores/useOptions';
 import { flagFromCountryCode } from '@/utils.js';
 
 import { DateTime } from "luxon";

@@ -1,11 +1,11 @@
-import App from "./App.vue";
+import Root from "./Root.vue";
 import { createApp } from "vue";
 import { createPinia } from 'pinia';
-import { router } from "./router/router.ts";
+import { router } from "./router/router";
 
 const components = import.meta.glob("./components/*.vue", { eager: true });
-const app = createApp(App);
-const pinia = createPinia()
+const app = createApp(Root);
+const pinia = createPinia();
 
 
 Object.entries(components).forEach(([path, module]) => {
@@ -24,4 +24,4 @@ Object.entries(components).forEach(([path, module]) => {
 
 app.use(pinia);
 app.use(router);
-app.mount("#app");
+app.mount("#root");

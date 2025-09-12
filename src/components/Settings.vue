@@ -12,6 +12,14 @@
             type="password"
             id="steam-api-key"
             placeholder="AZDB5F..." />
+          <small>
+            <sb-hint tooltip="Use this public address IP in Steam whitelisted IPs" />
+            Your current public IP is:
+            <code v-if="publicIp" class="public-ip"
+              @click="copyPublicIp">{{ publicIp || 'Loading...' }}
+            </code>
+            <code v-else class="public-ip" @click="setPublicIp">Click to reveal</code>
+          </small>
           <label for="interval">Auto sync interval</label>
           <details id="interval" class="dropdown">
             <summary role="button" class="secondary">
@@ -48,63 +56,92 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { invoke } from '@tauri-apps/api/core'
-import { useUpdaterStore } from '@/stores/updater.ts'
-import { useSettingsStore } from '@/stores/settings.ts'
+  import { ref, computed, onMounted } from 'vue'
+  import { invoke } from '@tauri-apps/api/core'
+  import { useUpdaterStore } from '@/stores/useUpdater'
+  import { useSettingsStore } from '@/stores/useSettings'
+  import { getPublicIp } from '@/utils.js'
 
-const settings = useSettingsStore()
-const updater = useUpdaterStore()
-const selectedInterval = computed(() => {
-  return availableIntervals.find(interval => interval.value == settings.poll_interval);
-})
-const availableIntervals = [{
-  value: 60,
-  label: '1 minute'
-}, {
-  value: 300,
-  label: '5 minutes'
-}, {
-  value: 600,
-  label: '10 minutes'
-}, {
-  value: 3600,
-  label: '1 hour'
+  const publicIp = ref("")
+  const settings = useSettingsStore()
+  const updater = useUpdaterStore()
+  const selectedInterval = computed(() => {
+    return availableIntervals.find(interval => interval.value == settings.poll_interval);
+  })
+  const availableIntervals = [{
+    value: 60,
+    label: '1 minute'
   }, {
-  value: 86400,
-  label: '1 day'
-}]
+    value: 300,
+    label: '5 minutes'
+  }, {
+    value: 600,
+    label: '10 minutes'
+  }, {
+    value: 3600,
+    label: '1 hour'
+  }, {
+    value: 86400,
+    label: '1 day'
+  }]
 
+  function openLocation() {
+    invoke('open_location_command')
+  }
 
-function openLocation() {
-  invoke('open_location_command')
-}
+  async function setPublicIp() {
+    publicIp.value = await getPublicIp();
+  }
+
+  async function copyPublicIp() {
+    const ip = publicIp.value
+    if (ip === 'Copied !') return
+    await navigator.clipboard.writeText(ip)
+    publicIp.value = "Copied !"
+    setTimeout(() => {
+      publicIp.value = ip
+    }, 2000)
+  }
 </script>
 
 <style lang="scss" scoped>
-.settings-container {
-  dialog {
-    article {
-      overflow: visible;
+  .settings-container {
+    dialog {
+      article {
+        overflow: visible;
 
-      form {
-        button {
-          margin-bottom: var(--pico-spacing);
+        form {
+          button {
+            margin-bottom: var(--pico-spacing);
+          }
+
+          small {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+          }
         }
-      }
 
-      li {
-        label {
-          margin-bottom: 0;
+        li {
+          label {
+            margin-bottom: 0;
+          }
         }
+
+        code.public-ip {
+          cursor: pointer;
+
+          &:hover {
+            color: var(--pico-primary);
+          }
+        }
+
+        //     height: 80%;
+
+        //     footer {
+        //         margin-top: auto;
+        //     }
       }
-
-      //     height: 80%;
-
-      //     footer {
-      //         margin-top: auto;
-      //     }
     }
   }
-}
 </style>

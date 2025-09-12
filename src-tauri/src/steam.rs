@@ -158,7 +158,7 @@ pub async fn get_changed_dates_for_partner(token: Option<String>, highwatermark:
         .map_err(|e| ErrorType::BadHttpRequest(e.to_string()))?;
 
     if response.status() == StatusCode::FORBIDDEN {
-        return Err(ErrorType::BadToken("Access forbidden (403): Check steam key or permissions".into()));
+        return Err(ErrorType::BadToken("Access forbidden (403): Check your steam key and whitelisted IPs".into()));
     }
 
     if !response.status().is_success() {
@@ -189,7 +189,7 @@ pub async fn get_detailed_sales(token: Option<String>, date: &str, highwatermark
         .map_err(|e| ErrorType::BadHttpRequest(e.to_string()))?;
 
     if response.status() == StatusCode::FORBIDDEN {
-        return Err(ErrorType::BadToken("Access forbidden (403): Check steam key or permissions".into()));
+        return Err(ErrorType::BadToken("Access forbidden (403): Check your steam key and whitelisted IPs".into()));
     }
 
     if !response.status().is_success() {
@@ -220,7 +220,7 @@ pub async fn check_api_key(api_key: Option<String>) -> Result<String, ErrorType>
         .map_err(|e| ErrorType::BadHttpRequest(e.to_string()))?;
 
     if response.status() == StatusCode::FORBIDDEN {
-        return Err(ErrorType::BadToken("Access forbidden (403): Check steam key or permissions".into()));
+        return Err(ErrorType::BadToken("Access forbidden (403): Check your steam key and whitelisted IPs".into()));
     }
 
     if !response.status().is_success() {

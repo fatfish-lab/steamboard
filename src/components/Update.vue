@@ -14,7 +14,7 @@
             Install Now
           </button>
           <button class="secondary"
-            @click="openUrl(`https://github.com/fatfish-lab/steamboard-private/releases/${updater.update.version}`)">
+            @click="openUrl(`https://github.com/fatfish-lab/steamboard-private/releases/${updater.update?.version}`)">
             <sb-icon icon="info" color="inherit" />
             See what's new
           </button>
@@ -31,11 +31,12 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
 import { openUrl } from '@tauri-apps/plugin-opener';
-import { useUpdaterStore } from '@/stores/updater.ts';
+import { useUpdaterStore } from '@/stores/useUpdater';
 import { relaunch } from '@tauri-apps/plugin-process';
+import { iAlert } from '@/injectionKeys';
 
 
-const alert = inject('alert')
+const alert = inject(iAlert)
 const updater = useUpdaterStore();
 const contentLength = ref(0);
 const downloaded = ref(0);

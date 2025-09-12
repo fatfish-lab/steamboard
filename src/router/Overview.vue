@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { useOptionsStore } from '@/stores/options.ts'
+import { useOptionsStore } from '@/stores/useOptions'
 
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from '@tauri-apps/api/event';

@@ -12,7 +12,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useOptionsStore } from '@/stores/options.ts'
+import { useOptionsStore } from '@/stores/useOptions'
 import Widget from '@/components/Widget.vue'
 
 const props = defineProps({

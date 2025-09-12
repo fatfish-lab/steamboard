@@ -1,0 +1,18 @@
+{
+  "allowImportingTsExtensions": true,
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "esModuleInterop": true, // For i18n
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "typeRoots": ["./node_modules/@types", "./node_modules/@fatfish-lab/ui/dist/types"],
+    "lib": ["esnext", "dom"]
+  },
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.vue",
+    "./components.d.ts"
+  ],
+  "exclude": ["node_modules"]
+}
