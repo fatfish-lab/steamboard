@@ -70,8 +70,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let _ = window.set_focus();
             }));
 
-            // #[cfg(desktop)]
-            // let _ = app.handle().plugin(tauri_plugin_updater::Builder::new().build());
+            #[cfg(desktop)]
+            let _ = app.handle().plugin(tauri_plugin_updater::Builder::new().build());
 
             let platform = tauri_plugin_os::platform();
             let icon_as_template = platform == "macos";
