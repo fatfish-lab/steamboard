@@ -237,7 +237,7 @@ jobs:
 
       - name: Upload binary for Microsoft Store (windows only)
         uses: actions/upload-artifact@v4.3.2
-        if: matrix.platform != 'windows-latest' && matrix.forstore
+        if: matrix.platform == 'windows-latest' && matrix.forstore
         with:
           name: ${{ matrix.artifactName }}
           path: ${{ matrix.binPath }}/${{ matrix.binName }}
