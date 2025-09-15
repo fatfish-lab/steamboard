@@ -19,7 +19,6 @@ jobs:
         include:
           - platform: 'macos-latest'
             name: 'macOS Universal'
-            environment: build
             args: '--target universal-apple-darwin'
             binName: 'Steamboard.app'
             artifactName: 'Steamboard.app'
@@ -44,7 +43,6 @@ jobs:
             args: '--config ./src-tauri/tauri.microsoftstore.conf.json'
           - platform: 'macos-latest'
             name: 'Apple app store'
-            environment: build
             appstore: true
             args: '--bundles app --target universal-apple-darwin --config ./src-tauri/tauri.appstore.conf.json'
             binName: 'Steamboard.app'
@@ -52,7 +50,7 @@ jobs:
             binPath: 'src-tauri/target/universal-apple-darwin/release/bundle/macos'
 
     name: ${{ matrix.name }}
-    environment: ${{ matrix.environment }}
+    environment: build
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -182,6 +180,8 @@ jobs:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERT_3RDPARTY_DEV_APP_BASE64 }}
           APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ env.CERT_DEV_APP_ID }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           args: ${{ matrix.args }}
 
