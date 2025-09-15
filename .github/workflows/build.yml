@@ -39,7 +39,7 @@ jobs:
             name: 'Windows x64 (Microsoft Store)'
             forstore: true
             binName: 'Steamboard.exe'
-            artifactName: 'Steamboard_for_store.exe'
+            artifactName: 'Steamboard_for_microsoftstore.exe'
             binPath: 'src-tauri/target/release'
             args: '--config ./src-tauri/tauri.microsoftstore.conf.json'
           - platform: 'macos-latest'
@@ -47,7 +47,7 @@ jobs:
             forstore: true
             args: '--bundles app --target universal-apple-darwin --config ./src-tauri/tauri.appstore.conf.json'
             binName: 'Steamboard.app'
-            artifactName: 'Steamboard_for_store.app'
+            artifactName: 'Steamboard_for_appstore.app'
             binPath: 'src-tauri/target/universal-apple-darwin/release/bundle/macos'
 
     name: ${{ matrix.name }}
